@@ -1,0 +1,64 @@
+\documentclass{article}
+\title{Dual Derivations of ALO for Elastic Net}
+\author{Yuze Zhou}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{subfigure}
+\begin{document}
+\maketitle
+\section{Dual Problem of Elastic Net}
+\paragraph{}The original problem for elastic net is to solve for $\hat{\beta}$ such that:
+\begin{center}
+$\hat{\beta} = \arg \min\limits_{\beta} \frac{1}{2}||y-X\beta||_{2}^{2} + \lambda_{1}||\beta||_{1}+\lambda_{2}||\beta||_{2}^{2}$
+\end{center}
+\paragraph{}By adding the Lagrangian, we get the formulation of $L$:
+\begin{center}
+$L = \frac{1}{2}||y-z||_{2}^{2} + \lambda_{1}||\beta||_{1}+\lambda_{2}||\beta||_{2}^{2}+u^{\tau}(z-X\beta)$
+\end{center}
+\paragraph{}The original problem is solving the primal of the Lagrangian such that $p^{*} = \min\limits_{\beta,z}\max\limits_{u}L$ and the dual formulation $d^{*} = \max\limits_{u}\min\limits_{\beta,z}L$, to minimize over $z$:
+\begin{center}
+$\frac{\partial L}{\partial z} = z -y +u = 0$\\
+$y = u + z$\\
+\end{center}
+\paragraph{}Since $\beta$ is penalized element-wisely, we can minimize over $\beta$ by minimizing over each $\beta_{i}$, that is, we have to minimize $\lambda_{1}|\beta_{i}| + \lambda_{2}\beta_{i}^{2} - u^{\tau}X_{i}\beta$ for each dimension of $\beta$, where $X_{i}$ denotes the $i$th column of $X$, therefore:
+\begin{center}
+$\min\limits_{\beta}\lambda_{1}|\beta_{i}| + \lambda_{2}\beta_{i}^{2} - u^{\tau}X_{i}\beta = $\\
+$ $\\
+$= \left\{
+\begin{aligned}
+0 \quad if \quad |u^{\tau}X_{i}| \leq \lambda_{1}\\
+-\frac{(\lambda_{1}-|u^{\tau}X_{i}|)^{2}}{4\lambda_{2}} \quad if \quad |u^{\tau}X_{i}| > \lambda_{1}\\
+\end{aligned}
+\right.
+$
+\end{center}
+\paragraph{}By taking all the above to the Lagrangian, we could obtain the dual problem $d^{*}$ as:
+\begin{center}
+$d^{*} = \min\limits_{u} \frac{1}{2}||y-u||_{2}^{2} + \sum\limits_{j: |X_{j}^{\tau}u| > \lambda_{1}}\frac{(\lambda_{1}-|u^{\tau}X_{i}|)^{2}}{4\lambda_{2}}$
+\end{center}
+\paragraph{}The minimizer $\hat{u}$ could also be obtained from the dual problem through a proximal approach:
+\begin{center}
+$\hat{u} = \textbf{prox}_{R}(y) \quad where \quad R(u) = \sum\limits_{j: |X_{j}^{\tau}u| > \lambda_{1}}\frac{(\lambda_{1}-|u^{\tau}X_{i}|)^{2}}{4\lambda_{2}}$
+\end{center}
+\section{ALO Estimation for Elastic Net}
+\paragraph{}By replacing the full data problem $y$ with $y_{\alpha} = y + (y_{i}^{/i}-y_{i})e_{i}$, where $y_{i}^{/i}$ is the true loo estimator and $e_{i}$ is the $i$th standard vector, and let $u^{/i} = \textbf{prox}_{R}(y_{\alpha})$, therefore:
+\begin{align*}
+0 &= e_{i}^{\tau}u^{/i}\\
+& = e_{i}^{\tau}\textbf{prox}_{R}(y_{\alpha})\\
+& \approx e_{i}^{\tau}(\textbf{prox}_{R}(y)+J_{R}(y)(y_{\alpha}-y))\\
+& \approx \hat{u}_{i} + J_{ii}(y_{i}^{/i}-y_{i})
+\end{align*}
+\paragraph{}Here $J_{R}(y)$ denotes the Jacobian matric of the proximal operator at $y$, thus the alo estimator $\tilde{y}_{i}$ is obtained as 
+\begin{center}
+$\tilde{y}_{i} = y_{i} - \frac{\hat{u}_{i}}{J_{ii}}$
+\end{center}
+\paragraph{}The Jacobian could locally be obtained as:
+\begin{align*}
+J_{R}(y) &= (I+\nabla^{2}R(\textbf{prox}_{R}(y)))^{-1}\\
+&= (I + \nabla^{2}R(\hat{u}))^{-1}\\
+&= (I + \frac{1}{2\lambda_{2}}X_{E}X_{E}^{\tau})^{-1}\\
+\end{align*}
+\paragraph{}Here $E = \{j:|X_{j}^{\tau}u|>\lambda_{1}\}$.
+\end{document}
