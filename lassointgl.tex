@@ -1,0 +1,34 @@
+\documentclass{article}
+\title{ALO for LASSO with Intercept through Generalized LASSO}
+\author{Yuze Zhou}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{subfigure}
+\begin{document}
+\maketitle
+\section{The Dual of LASSO with intercept}
+\paragraph{}For the generalized LASSO problem $\min\limits_{\beta}\frac{1}{2}||y-X\beta||+\lambda||D\beta||_{1}$, the dual problem is derived as:
+\begin{center}
+$\min\limits_{u}\frac{1}{2}||y-\theta||_{2}^{2}$\\
+$\theta \in \{X^{\tau}\theta = D^{\tau}u, ||u||_{\infty} \leq \lambda\}$
+\end{center}
+\paragraph{}The dual problem could be written in a proximal approach such that:
+\begin{center}
+$\hat{u} = \textbf{prox}_{R}(y)$\\
+$R(u) = \left\{
+\begin{aligned}
+0 \quad \if \theta \in \{X^{\tau}\theta = D^{\tau}u, ||u||_{\infty} \leq \lambda\}\\
++\infty \quad otherwise
+\end{aligned}
+\right.
+$
+\end{center}
+\paragraph{}Denote $J$ as the jacobian of the proximal operator at the full data problem $y$, then the ALO estimator could be obtained as:
+\begin{center}
+$y^{/i} = y_{i} - \frac{\hat{u}_{i}}{J_{ii}}$
+\end{center}
+\paragraph{}For the case of LASSO with an intercept, we could expand the $X$ with a column of ones in the first column, expand $\beta$ with another dimension and choose $D = [\textbf{0}, I ]$.
+\paragraph{}Denote $E := \{j: |X_{i}^{\tau}\theta| = \lambda \}$ to be the active set. Then the Jacobian is locally given as the projection onto the orthogonal complement of the span of $X_{E}$ and the ones vector. Further denote $\tilde{X}_{E} = [\textbf{1}, X_{E}]$, then the Jacobian is given as $I - \tilde{X_{E}}(\tilde{X_{E}}^{\tau}\tilde{X_{E}})\tilde{X_{E}}^{\tau}$.
+\end{document}
