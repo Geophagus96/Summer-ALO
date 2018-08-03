@@ -1,0 +1,84 @@
+\documentclass{article}
+\title{ALO for Logistic Regression and Poisson Regression}
+\author{Yuze Zhou}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\begin{document}
+\section{ALO for Logistic Regression}
+\subsection{ALO for Logistic Regression with Lasso penalty}
+\paragraph{}First Let's rewrite the optimization problem with the loss functions separated for each observation, therefore the loss function goes:
+\begin{center}
+$-\sum\limits_{i}(y_{i}x_{i}^{\tau}\beta+log(1+exp(x_{i}^{\tau}\beta)))+\lambda_{1}||\beta||_{1}$
+\end{center}
+\paragraph{}Where, separatively, the loss function is $l(x_{i}^{\tau}\beta ;y_{i}) = y_{i}x_{i}^{\tau}\beta+log(1+exp(x_{i}^{\tau}\beta))$ and the regularizer is $R(\beta) = \lambda_{1}||\beta||_{1}$, from which we could derive the dual optimal $\hat{\theta} = y - \frac{e^{X\beta}}{1+e^{X\beta}}$, as well as the conjugate functions of them as $l^{*}(-\theta_{i};y_{i})=(y_{i}-\theta_{i})ln\frac{y_{i}-\theta_{i}}{1-(y_{i}-\theta_{i})}-ln\frac{1}{1-(y_{i}-\theta_{i})}$,
+\begin{center}
+$R^{*}(\beta) = \left\{
+\begin{aligned}
+0 \quad ||\beta||_{\infty} \leq \lambda_{1}\\
+\infty \quad o.w.\\
+\end{aligned}
+\right.$
+\end{center}
+\paragraph{}From the results of the conjugate functions above, we could also obtain the derivatives of the loss functions and the Jacobian of the regularizer:
+\begin{center}
+$\dot{l}^{*}(-\theta_{i};y_{i}) = ln \frac{y_{i}-\theta_{i}}{1-(y_{i}-\theta_{i})}$\\
+$\ddot{l}^{*}(-\theta_{i};y_{i}) = \frac{1}{(y_{i}-\theta_{i})(1-(y_{i}-\theta_{i}))}$
+\end{center}
+\paragraph{}Recall (15) from the \textbf{General Smooth Loss}, the quadratic surrogate of the dual problem is $\min\limits_{u} \frac{1}{2}\sum\limits_{i}(u_{i}-\frac{\hat{\theta}_{i}\ddot{l}^{*}(-\hat{\theta}_{i};y_{i})+\hat{y}_{i}}{\sqrt{\ddot{l}^{*}(-\hat{\theta}_{i};y_{i})}})^{2}+R^{*}(X^{\tau}Ku)$, where $K =diag(\sqrt{\ddot{l}^{*}(-\hat{\theta}_{i};y_{i})})$ therefore the Jacobian at $y_{u} = \frac{\hat{\theta}_{i}\ddot{l}^{*}(-\hat{\theta}_{i};y_{i})+\hat{\theta}_{i}}{\sqrt{\ddot{l}^{*}(-\hat{\theta}_{i};y_{i})}}$ could locally be treated as the projection onto the orthogonal complement of the polyhedra $\{||X^{\tau}Ku||_{\infty} \leq \lambda_{1}\}$, thus $J = I - X_{u,E}(X_{u,E}^{\tau}X_{u,E})^{-1}X_{u,E}$, where $X_{u,E}$ are the columns of $X_{u}=X^{\tau}K$, such that the columns in the set $E = \{|X_{i}^{\tau}\theta| = \lambda_{1}\}$ are selected. Take everything to (17), $y^{/i} = K_{ii}(y_{u,i}-\frac{K_{ii}\hat{\theta}_{i}}{J_{ii}})$, we could obtain the alo for the $i$th observation.
+\subsubsection{ALO for Logistic Regression with Lasso Penalty with intercept included}
+\paragraph{}If we include intercept for the model but it will not be penalized, and rewrite $\tilde{x_{i}} = [1; x_{i}]$, $\tilde{X} = [
+\textbf{1},X]$ and $\tilde{\beta} = [\beta_{0},\beta]$, the loss function stays in the same form as the case with no intercept, that is $l(\tilde{x_{i}}^{\tau}\tilde{\beta};y_{i})= -(y_{i}\tilde{x_{i}}^{\tau}\tilde{\beta}+log(1+exp(\tilde{x_{i}}^{\tau}\tilde{\beta})))$, and the but the regularizer will be different, it becomes $R(\tilde{\beta}) = \lambda_{1}||D\tilde{\beta}||_{1}$, where $D = [\textbf{0},I]$. Therefore, the corresponding dual optimal becomes $\hat{\theta} = y - \frac{e^{\tilde{X}\tilde{\beta}}}{1+e^{\tilde{X}\tilde{\beta}}}$, the conjugate of the loss function will stay the same, but the conjugate for $R(\tilde{\beta})$ shall be changed.
+\begin{center}
+$R^{*}(\tilde{\beta}) = \left\{
+\begin{aligned}
+0 & \quad if \quad \beta_{0} = 0 \quad and \quad \beta_{i} \leq \lambda_{1}\\
++\infty & \quad o.w.
+\end{aligned}
+\right.$
+\end{center}
+\paragraph{}Given the new regularizer and loss function, we could derive the new $\tilde{X}_{u} = K^{-1}\tilde{X}$, and the corresponding Jacobian is therefore $J = I -\tilde{X}_{u,\tilde{E}}(\tilde{X}_{u,\tilde{E}}^{\tau}\tilde{X}_{u,\tilde{E}})^{-1}\tilde{X}_{u,\tilde{E}}^{\tau}$, where $\tilde{E}$ denotes the columns of $\tilde{X}_{u}$ such that $\tilde{E} = \{j:\tilde{X}_{j}^{\tau}\theta \leq \lambda_{1}\}$.
+\subsection{ALO for Logistic Regression with Elastic Net Penalty}
+\paragraph{}The optimization problem for logistic regression with elastic net penalty is:
+\begin{center}
+$-\sum\limits_{i}(y_{i}x_{i}^{\tau}\beta+log(1+exp(x_{i}^{\tau}\beta)))+\lambda_{1}||\beta||_{1}+\lambda_{2}||\beta||_{2}^{2}$
+\end{center}
+\paragraph{}The optimization problem is the same except the regularizer is changed, therefore the only thing different is the conjugate function of the regularizer, $R^{*}$ and the corresponding Jacobian, here $R(\beta) = \lambda_{1}||\beta||_{1}+\lambda_{2}||\beta||_{2}^{2}$:
+\begin{center}
+$R^{*}(\beta) = \sum\limits_{|u_{i}| > \lambda_{1}} \frac{(\lambda_{1}-|u_{i}|)^{2}}{4\lambda_{2}}$
+\end{center}
+\paragraph{}The corresponding Jacobian is $J = (I + \frac{1}{2\lambda_{2}}X_{u,E}X_{u,E}^{\tau})$, where $X_{u,E}$ are the columns of $X_{u}=K^{-1}X$, such that the columns in the set $E = \{|X_{i}^{\tau}\theta| = \lambda_{1}\}$ are selected. Take everything to (17), $y^{/i} = K_{ii}(y_{u,i}-\frac{K_{ii}\hat{\theta}_{i}}{J_{ii}})$, we could obtain the alo for the $i$th observation.
+\subsubsection{ALO for Logistic Regression with Elastic Net Penalty with intercept}
+\paragraph{}The loss function for logistic regression with elastic net penalty with intercept is the same as the case without an intercept, however, the regularizer function is different. The dual optimal will also be $\hat{\theta} = y - \frac{e^{X\beta}}{1+e^{X\beta}}$. Using the same notations $D$ and $\tilde{\beta}$in the logistic regression with lasso penalty with intercept part, the regularizer now becomes $\lambda_{1}||D\beta||_{1}+\lambda_{2}||D\beta||_{2}^{2}$, the conjugate of which is therefore:
+\begin{center}
+$R^{*}(\beta) = \left\{
+\begin{aligned}
+\sum\limits_{i:|\beta_{i}|>\lambda_{1}}\frac{(\lambda_{1}-|\beta_{1}|)^{2}}{4\lambda_{2}} &\quad if \quad \beta_{0}=0\\
++\infty \quad o.w.
+\end{aligned}
+\right.$
+\end{center}
+\paragraph{}First denote the set $\{E:|X_{j}^{\tau}\theta| > \lambda_{1}\}$ and $A = \frac{1}{2\lambda_{2}}\tilde{X}_{u,E}\tilde{X}_{u,E}^{\tau}$, the new Jacobian becomes: 
+\begin{center}
+$J = (I+A)^{-1}-\frac{(I+A)^{-1}\textbf{1}\textbf{1}^{\tau}(I+A)^{-1}}{\textbf{1}^{\tau}(I+A)^{-1}\textbf{1}}$
+\end{center}
+\paragraph{}By plugging everything into (17), we could obtain the alo.
+\section{ALO for Poisson Regression}
+\subsection{ALO for Poisson Regression with Lasso Penalty}
+\paragraph{}The optimization function for Poisson regression with lasso penalty is:
+\begin{center}
+$\sum\limits_{i}-y_{i}x_{i}^{\tau}\beta+e^{x_{i}^{\tau}\beta}+log(y_{i}!) + \lambda_{1}||\beta||_{1}$
+\end{center}
+\paragraph{}The regularizer is the same as the logistic regression with the lasso penalty case, thus the Jacobian will also be the same, therefore we only have to focus on the loss function $l(x_{i}^{\tau}\beta ; y_{i}) = -y_{i}x_{i}^{\tau}\beta+e^{x_{i}^{\tau}\beta}+log(y_{i}!)$. The optimal solution for the dual problem $\hat{\theta} = y - e^{X\beta}$ and the conjugate of the loss function is $l^{*}(-\theta_{i};y_{i}) = (y_{i}-\theta_{i})ln(y_{i}-\theta_{i})-(y_{i}-\theta_{i})$, the corresponding derivatives are therefore:
+\begin{center}
+$\dot{l}^{*}(-\theta_{i};y_{i}) = ln(y_{i}-\theta_{i})$\\
+$\ddot{l}^{*}(-\theta_{i};y_{i}) = \frac{1}{y_{i}-\theta_{i}}$
+\end{center}
+\paragraph{}By plugging everything into (17), we obtain the alo for Poisson regression with the lasso penalty.
+\subsubsection{ALO for Poisson Regression with Lasso Penalty with Intercept}
+\paragraph{}Using the same notations $\tilde{X}$ and $\tilde{\beta}$, the loss function now becomes $l(x_{i}^{\tau}\beta ; y_{i}) = -y_{i}\tilde{x}_{i}^{\tau}\tilde{\beta}+e^{\tilde{x}_{i}^{\tau}\tilde{\beta}}+log(y_{i}!)$, and the dual optimal now becomes $\hat{\theta} = y - e^{\tilde{X}\beta}$. The regularizer is also the same as the logistic regression with lasso penalty with lasso penalty with intercept case, therefore the Jacobian is of the same formula, thus by plugging everything into (17), we could obtain the alo.
+\subsection{ALO for Poisson Regression with Elastic Net Penalty}
+\paragraph{}The loss function for Poisson regression with elastic net penalty is the same as that of Poisson regression with the lasso penalty and the regularizer of it is the same as that of logistic regression with elastic net penalty, thus by plugging everything into (17), we could obtain the alo for Poisson regression with elastic net penalty.
+\subsubsection{ALO for Poisson Regression with Elastic Net Penalty with Intercept}
+\paragraph{}Here the loss function is the same as that of Poisson Regression with Lasso penalty with intercept case and the regularizer is the same as Logistic Regression with elastic net penalty with intercept, thus the formula for the derivatives of loss functions, the dual optimal as well as the Jacobian could be directly obtained using the same formula as mentioned before.
+\end{document}
